@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:mongo="http://www.springframework.org/schema/data/mongo" 
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	    http://www.springframework.org/schema/data/mongo 
+	    http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+	   default-lazy-init="true">
+
+	<description>Spring公共配置 </description>
+	<!-- 读取配置文件资源 
+	注意：多个properties文件出现时，bean的id设置为propertyConfigurer1，否则出现Could not resolve placeholder的错误
+	-->
+	<bean id="propertyConfigurer1"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<!-- 文件路径 -->
+			 	<value>classpath:/mongodb.properties</value>
+			</list>
+		</property>
+	</bean>
+	<context:component-scan base-package="com.ulrica.mongodb.demo" />  
+  
+    <mongo:mongo host="${mongo.server}" port="${mongo.port}" />  
+  
+    <!-- mongo的工厂，通过它来取得mongo实例,dbname为mongodb的数据库名，没有的话会自动创建 -->  
+    <mongo:db-factory dbname="mymongo" mongo-ref="mongo" />  
+  
+    <!-- mongodb的主要操作对象，所有对mongodb的增删改查的操作都是通过它完成 -->  
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">  
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />  
+    </bean>  
+  
+    <!-- 映射转换器，扫描back-package目录下的文件，根据注释，把它们作为mongodb的一个collection的映射 -->  
+    <mongo:mapping-converter base-package="com.ulrica.mongodb.demo.model" />  
+  
+    <!-- mongodb bean的仓库目录，会自动扫描扩展了MongoRepository接口的接口进行注入 -->  
+    <mongo:repositories base-package="com.ulrica.mongodb.demo.impl" />  
+  
+    <context:annotation-config />  
+
+</beans>
